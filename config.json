@@ -1,0 +1,8 @@
+{
+  "job_keywords": ["AI", "machine learning", "ML", "deep learning", "NLP", "LLM", "GenAI", "generative AI", "artificial intelligence", "data science", "neural network", "computer vision"],
+  "location_keywords": ["remote", "work from home", "WFH", "anywhere"],
+  "role_keywords": ["engineer", "scientist", "researcher", "architect", "developer", "analyst", "consultant", "specialist", "lead", "manager", "director"],
+  "exclude_keywords": ["intern", "junior", "entry level", "entry-level", "apprentice", "graduate", "no experience"],
+  "min_salary": null,
+  "max_results_per_board": 50
+}
