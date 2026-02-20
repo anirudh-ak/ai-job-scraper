@@ -2,8 +2,6 @@ import json
 import time
 import os
 from scrapers.remoteok import fetch_remoteok
-from scrapers.remotive import fetch_remotive
-from scrapers.remoteco import fetch_remoteco
 from scrapers.himalayas import fetch_himalayas
 import pandas as pd
 
@@ -22,19 +20,11 @@ def dedupe(jobs):
 
 def save_csv(jobs):
     df = pd.DataFrame(jobs)
-    ts = time.strftime("%Y-%m-%d")
+    ts = time.strftime("%Y-%m-%d_%H-%M-%S")
     outdir = "outputs"
     os.makedirs(outdir, exist_ok=True)
     filename = f"ai_jobs_{ts}.csv"
     path = os.path.join(outdir, filename)
-    
-    # If file exists, append timestamp to make it unique
-    if os.path.exists(path):
-        base, ext = os.path.splitext(filename)
-        ts_unique = time.strftime("%Y-%m-%d_%H-%M-%S")
-        filename = f"{base}_{ts_unique}{ext}"
-        path = os.path.join(outdir, filename)
-    
     df.to_csv(path, index=False)
     return path
 
@@ -52,22 +42,6 @@ def main():
         all_jobs.extend(r_jobs)
     except Exception as e:
         print("RemoteOK fetch failed:", e)
-
-    print("Fetching Remotive...")
-    try:
-        rm_jobs = fetch_remotive(config)
-        print(f"Remotive: found {len(rm_jobs)} jobs (pre-dedup)")
-        all_jobs.extend(rm_jobs)
-    except Exception as e:
-        print("Remotive fetch failed:", e)
-
-    print("Fetching Remote.co...")
-    try:
-        rc_jobs = fetch_remoteco(config)
-        print(f"Remote.co: found {len(rc_jobs)} jobs (pre-dedup)")
-        all_jobs.extend(rc_jobs)
-    except Exception as e:
-        print("Remote.co fetch failed:", e)
 
     print("Fetching Himalayas...")
     try:

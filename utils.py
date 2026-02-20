@@ -61,17 +61,11 @@ def job_matches(job, config):
     job_keys = config.get("job_keywords") or []
     role_keys = config.get("role_keywords") or []
 
-    # 3. Job keyword must appear in title+tags (strong signal)
-    title_tags = f"{title} {tags_text}"
-    has_job_kw_in_title = any(_contains_word(title_tags, jk) for jk in job_keys)
-
-    if not has_job_kw_in_title:
-        # Fallback: keyword in description is only acceptable if a role keyword
-        # is also in the title (the role is clearly relevant, AI is the context)
-        has_job_kw_in_desc = any(_contains_word(description, jk) for jk in job_keys)
-        has_role_in_title = any(_contains_word(title, rk) for rk in role_keys)
-        if not (has_job_kw_in_desc and has_role_in_title):
-            return False
+    # 3. Job keyword must appear in the title only.
+    # Tags are unreliable (Himalayas tags "AI" on generic roles) and descriptions
+    # are noisy HTML blobs. Title is the only trustworthy signal.
+    if not any(_contains_word(title, jk) for jk in job_keys):
+        return False
 
     # 4. Role keyword must appear in the title
     if not any(_contains_word(title, rk) for rk in role_keys):
