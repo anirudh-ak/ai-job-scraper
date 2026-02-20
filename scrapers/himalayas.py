@@ -17,41 +17,63 @@ def fetch_himalayas(config):
     limit = 20  # API max per request
     offset = 0
     
-    # Build a search query from the first few job_keywords to pre-filter at API level
-    job_keys = config.get("job_keywords") or []
-    search_query = " OR ".join(job_keys[:5]) if job_keys else "AI"
+    # Himalayas API search doesn't reliably filter by keyword, so we fetch
+    # broadly and rely on local title-based filtering. Use category param instead.
+    search_query = None
+
+    # Fetch up to 50 pages (1000 jobs) to find enough worldwide+matching titles.
+    # Most jobs on Himalayas are country-restricted, so we need to scan broadly.
+    max_pages = 50
+    pages_fetched = 0
 
     try:
-        while len(jobs) < max_results:
+        while len(jobs) < max_results and pages_fetched < max_pages:
+            url_params = f"limit={limit}&offset={offset}"
             resp = requests.get(
-                f"{base_url}?limit={limit}&offset={offset}&q={requests.utils.quote(search_query)}",
+                f"{base_url}?{url_params}",
                 headers=headers,
                 timeout=15
             )
             resp.raise_for_status()
             data = resp.json()
-            
+
             job_list = data.get("jobs", [])
             if not job_list:
                 break
-            
+
             for item in job_list:
                 if len(jobs) >= max_results:
                     break
-                
+
+                if not _location_allowed(item, config):
+                    continue
+
                 job_data = _parse_himalayas_job(item)
                 if job_data and job_matches(job_data, config):
                     jobs.append(job_data)
-            
+
             offset += limit
-            
-            # Rate limiting - reduced for faster execution
+            pages_fetched += 1
+
+            # Rate limiting
             time.sleep(0.5)
             
     except Exception as e:
         print(f"Error fetching from Himalayas: {e}")
     
     return jobs
+
+
+def _location_allowed(item, config):
+    """Return True only if the job has no location restrictions (truly worldwide).
+
+    Empty locationRestrictions ([]) = open to everyone.
+    Any non-empty list means the job is restricted to specific countries — skip it.
+    """
+    if not config.get("worldwide_only", True):
+        return True  # location filtering disabled in config
+    restrictions = item.get("locationRestrictions") or []
+    return len(restrictions) == 0
 
 
 def _parse_himalayas_job(item):

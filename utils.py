@@ -52,7 +52,8 @@ def job_matches(job, config):
         if _contains_word(title + " " + description, ex):
             return False
 
-    # 2. Location check
+    # 2. Location check — skipped if "anywhere" is in location_keywords (default).
+    # All boards we use are already remote-only, so this is rarely needed.
     loc_keywords = [k.lower() for k in (config.get("location_keywords") or [])]
     if "anywhere" not in loc_keywords:
         if not any(_contains_word(combined, lk) for lk in loc_keywords):

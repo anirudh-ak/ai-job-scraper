@@ -2,7 +2,9 @@ import json
 import time
 import os
 from scrapers.remoteok import fetch_remoteok
-from scrapers.himalayas import fetch_himalayas
+from scrapers.jobicy import fetch_jobicy
+from scrapers.arbeitnow import fetch_arbeitnow
+from scrapers.themuse import fetch_themuse
 import pandas as pd
 
 
@@ -43,13 +45,29 @@ def main():
     except Exception as e:
         print("RemoteOK fetch failed:", e)
 
-    print("Fetching Himalayas...")
+    print("Fetching Jobicy...")
     try:
-        him_jobs = fetch_himalayas(config)
-        print(f"Himalayas: found {len(him_jobs)} jobs (pre-dedup)")
-        all_jobs.extend(him_jobs)
+        jcy_jobs = fetch_jobicy(config)
+        print(f"Jobicy: found {len(jcy_jobs)} jobs (pre-dedup)")
+        all_jobs.extend(jcy_jobs)
     except Exception as e:
-        print("Himalayas fetch failed:", e)
+        print("Jobicy fetch failed:", e)
+
+    print("Fetching Arbeitnow...")
+    try:
+        abn_jobs = fetch_arbeitnow(config)
+        print(f"Arbeitnow: found {len(abn_jobs)} jobs (pre-dedup)")
+        all_jobs.extend(abn_jobs)
+    except Exception as e:
+        print("Arbeitnow fetch failed:", e)
+
+    print("Fetching The Muse...")
+    try:
+        muse_jobs = fetch_themuse(config)
+        print(f"The Muse: found {len(muse_jobs)} jobs (pre-dedup)")
+        all_jobs.extend(muse_jobs)
+    except Exception as e:
+        print("The Muse fetch failed:", e)
 
     all_jobs = dedupe(all_jobs)
 
