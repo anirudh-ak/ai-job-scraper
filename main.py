@@ -3,8 +3,8 @@ import time
 import os
 from scrapers.remoteok import fetch_remoteok
 from scrapers.jobicy import fetch_jobicy
-from scrapers.arbeitnow import fetch_arbeitnow
 from scrapers.themuse import fetch_themuse
+from scrapers.greenhouse import fetch_greenhouse
 import pandas as pd
 
 
@@ -53,14 +53,6 @@ def main():
     except Exception as e:
         print("Jobicy fetch failed:", e)
 
-    print("Fetching Arbeitnow...")
-    try:
-        abn_jobs = fetch_arbeitnow(config)
-        print(f"Arbeitnow: found {len(abn_jobs)} jobs (pre-dedup)")
-        all_jobs.extend(abn_jobs)
-    except Exception as e:
-        print("Arbeitnow fetch failed:", e)
-
     print("Fetching The Muse...")
     try:
         muse_jobs = fetch_themuse(config)
@@ -68,6 +60,14 @@ def main():
         all_jobs.extend(muse_jobs)
     except Exception as e:
         print("The Muse fetch failed:", e)
+
+    print("Fetching Greenhouse...")
+    try:
+        gh_jobs = fetch_greenhouse(config)
+        print(f"Greenhouse: found {len(gh_jobs)} jobs (pre-dedup)")
+        all_jobs.extend(gh_jobs)
+    except Exception as e:
+        print("Greenhouse fetch failed:", e)
 
     all_jobs = dedupe(all_jobs)
 
